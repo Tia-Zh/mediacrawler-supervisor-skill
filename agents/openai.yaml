@@ -1,0 +1,4 @@
+interface:
+  display_name: "MediaCrawler Supervisor"
+  short_description: "Install, run, monitor, and summarize MediaCrawler tasks"
+  default_prompt: "Use $mediacrawler-supervisor to plan, run, monitor, and summarize a MediaCrawler data collection task."

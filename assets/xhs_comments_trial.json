@@ -1,0 +1,13 @@
+{
+  "platform": "xhs",
+  "crawler_type": "search",
+  "login_type": "qrcode",
+  "keywords": ["replace with topic", "replace with topic comments"],
+  "get_comment": true,
+  "get_sub_comment": false,
+  "max_posts": 20,
+  "max_comments_per_post": 30,
+  "max_concurrency": 1,
+  "save_data_option": "jsonl",
+  "headless": false
+}

@@ -22,7 +22,7 @@ Create one JSON file per MediaCrawler run. Keep it small, explicit, and reproduc
 
 ## Fields
 
-- `media_crawler_home`: Optional absolute path to MediaCrawler. Prefer `MEDIACRAWLER_HOME` when available.
+- `media_crawler_home`: Optional absolute path to MediaCrawler. Prefer `MEDIACRAWLER_HOME` when available. New installs should use the Data Assistant adapted MediaCrawler repository unless the user asks for another source.
 - `run_dir`: Optional absolute or relative run directory. If omitted, `run_task.py` creates a timestamped directory beside the task file.
 - `platform`: Required. One of `xhs`, `dy`, `ks`, `bili`, `wb`, `tieba`, `zhihu`.
 - `crawler_type`: Required. One of `search`, `detail`, `creator`.

@@ -14,7 +14,13 @@ If missing, ask the user before installing:
 scripts\bootstrap.ps1
 ```
 
-The user must review MediaCrawler's license and the target platforms' terms before collection.
+By default, `bootstrap.ps1` installs the Data Assistant adapted repository:
+
+```text
+https://github.com/Tia-Zh/MediaCrawler-data-assistant.git
+```
+
+Use `-RepoUrl` only when the user explicitly wants another MediaCrawler source. The user must review MediaCrawler's license and the target platforms' terms before collection.
 
 ## Dependency Failure
 

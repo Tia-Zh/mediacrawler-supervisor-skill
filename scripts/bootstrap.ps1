@@ -1,6 +1,6 @@
 param(
     [string]$InstallRoot = (Join-Path $HOME ".data_assistant\engines"),
-    [string]$RepoUrl = "https://github.com/NanmiCoder/MediaCrawler.git",
+    [string]$RepoUrl = "https://github.com/Tia-Zh/MediaCrawler-data-assistant.git",
     [switch]$SkipPlaywrightInstall
 )
 
@@ -22,6 +22,7 @@ if (Test-Path (Join-Path $target "main.py")) {
     Write-Host "MediaCrawler already exists at $target"
 } else {
     Write-Host "Cloning MediaCrawler into $target"
+    Write-Host "Source: $RepoUrl"
     git clone $RepoUrl $target
 }
 
@@ -38,6 +39,7 @@ try {
     Write-Host ""
     Write-Host "Bootstrap complete."
     Write-Host "Set MEDIACRAWLER_HOME to: $target"
+    Write-Host "Default source is the Data Assistant adapted MediaCrawler repository."
     Write-Host "Review MediaCrawler LICENSE and platform terms before running collection tasks."
 } finally {
     Pop-Location

@@ -20,7 +20,19 @@ By default, `bootstrap.ps1` installs the Data Assistant adapted repository:
 https://github.com/Tia-Zh/MediaCrawler-data-assistant.git
 ```
 
+The default ref is `data-assistant-v0.1.2`. This version includes the Data Assistant stale-tab cleanup patch for `wb`, `dy`, `ks`, `xhs`, `bili`, `tieba`, and `zhihu`.
+
 Use `-RepoUrl` only when the user explicitly wants another MediaCrawler source. The user must review MediaCrawler's license and the target platforms' terms before collection.
+
+## Missing Cleanup Patch
+
+If `doctor.ps1` reports that the cleanup patch is missing, run:
+
+```powershell
+scripts\bootstrap.ps1
+```
+
+If the existing MediaCrawler directory has local changes, bootstrap will not overwrite it automatically. Review or back up those changes, then update MediaCrawler to the adapted ref manually.
 
 ## Dependency Failure
 

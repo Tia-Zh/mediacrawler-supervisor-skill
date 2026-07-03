@@ -38,6 +38,9 @@ $foundHome = Find-MediaCrawler $MediaCrawlerHome
 $checks = [ordered]@{
     mediaCrawlerHome = $foundHome
     mediaCrawlerFound = [bool]$foundHome
+    dataAssistantCleanupPatch = $false
+    dataAssistantCleanupPlatforms = @()
+    dataAssistantCleanupMissing = @()
     git = [ordered]@{ found = Test-Command "git"; version = "" }
     uv = [ordered]@{ found = Test-Command "uv"; version = "" }
     python = [ordered]@{ found = Test-Command "python"; version = "" }
@@ -60,11 +63,32 @@ $chromePaths = @(
 )
 $checks.chromeLikely = [bool]($chromePaths | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1)
 
+if ($foundHome) {
+    $platforms = @("douyin", "kuaishou", "xhs", "bilibili", "weibo", "tieba", "zhihu")
+    foreach ($platform in $platforms) {
+        $corePath = Join-Path $foundHome "media_platform\$platform\core.py"
+        if (Test-Path $corePath) {
+            $text = Get-Content -LiteralPath $corePath -Encoding UTF8 -Raw
+            if ($text.Contains("async def data_assistant_cleanup_pages") -and $text.Contains("await self.data_assistant_cleanup_pages()")) {
+                $checks.dataAssistantCleanupPlatforms += $platform
+            } else {
+                $checks.dataAssistantCleanupMissing += $platform
+            }
+        } else {
+            $checks.dataAssistantCleanupMissing += $platform
+        }
+    }
+    $checks.dataAssistantCleanupPatch = ($checks.dataAssistantCleanupMissing.Count -eq 0)
+}
+
 if (-not $checks.mediaCrawlerFound) { $checks.warnings += "MediaCrawler not found. Set MEDIACRAWLER_HOME or run bootstrap.ps1." }
 if (-not $checks.git.found) { $checks.warnings += "git is missing; bootstrap cannot clone MediaCrawler." }
 if (-not $checks.uv.found) { $checks.warnings += "uv is missing; install uv before dependency sync." }
 if (-not $checks.node.found) { $checks.warnings += "node is missing; some MediaCrawler platforms require Node.js." }
 if (-not $checks.chromeLikely) { $checks.warnings += "Chrome/Edge was not found in common locations; CDP login may fail." }
+if ($checks.mediaCrawlerFound -and -not $checks.dataAssistantCleanupPatch) {
+    $checks.warnings += "MediaCrawler is missing the Data Assistant stale-tab cleanup patch for: $($checks.dataAssistantCleanupMissing -join ', '). Run bootstrap.ps1 to update to the adapted version."
+}
 
 if ($Json) {
     $checks | ConvertTo-Json -Depth 5
@@ -72,6 +96,7 @@ if ($Json) {
     "MediaCrawler doctor"
     "MediaCrawler found: $($checks.mediaCrawlerFound)"
     "MediaCrawler home : $($checks.mediaCrawlerHome)"
+    "Cleanup patch    : $($checks.dataAssistantCleanupPatch)"
     "git              : $($checks.git.found) $($checks.git.version)"
     "uv               : $($checks.uv.found) $($checks.uv.version)"
     "python           : $($checks.python.found) $($checks.python.version)"

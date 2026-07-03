@@ -1,6 +1,7 @@
 param(
     [string]$InstallRoot = (Join-Path $HOME ".data_assistant\engines"),
     [string]$RepoUrl = "https://github.com/Tia-Zh/MediaCrawler-data-assistant.git",
+    [string]$RepoRef = "data-assistant-v0.1.2",
     [switch]$SkipPlaywrightInstall
 )
 
@@ -28,6 +29,21 @@ if (Test-Path (Join-Path $target "main.py")) {
 
 Push-Location $target
 try {
+    if (Test-Path ".git") {
+        $dirty = git status --porcelain
+        if ($dirty) {
+            Write-Warning "MediaCrawler has local changes. Skipping automatic checkout of $RepoRef."
+            Write-Warning "Review the changes, then update manually if this is not intentional."
+        } else {
+            Write-Host "Updating MediaCrawler to $RepoRef"
+            git fetch --tags origin
+            git checkout $RepoRef
+        }
+    } else {
+        Write-Warning "MediaCrawler exists but is not a git checkout. Cannot automatically update to $RepoRef."
+        Write-Warning "Install into a new directory or replace it with the Data Assistant adapted repository if the cleanup patch is missing."
+    }
+
     Write-Host "Syncing Python dependencies with uv"
     uv sync
 
@@ -40,6 +56,7 @@ try {
     Write-Host "Bootstrap complete."
     Write-Host "Set MEDIACRAWLER_HOME to: $target"
     Write-Host "Default source is the Data Assistant adapted MediaCrawler repository."
+    Write-Host "Default version is: $RepoRef"
     Write-Host "Review MediaCrawler LICENSE and platform terms before running collection tasks."
 } finally {
     Pop-Location

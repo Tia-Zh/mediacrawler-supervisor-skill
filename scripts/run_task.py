@@ -92,6 +92,20 @@ def resolve_run_dir(task_path: Path, task: dict[str, Any]) -> Path:
     return (task_path.parent / f"{stamp}_{stem}").resolve()
 
 
+def has_cleanup_patch(media_home: Path) -> bool:
+    platforms = ("douyin", "kuaishou", "xhs", "bilibili", "weibo", "tieba", "zhihu")
+    for platform in platforms:
+        core_py = media_home / "media_platform" / platform / "core.py"
+        if not core_py.exists():
+            return False
+        text = core_py.read_text(encoding="utf-8", errors="ignore")
+        if "async def data_assistant_cleanup_pages" not in text:
+            return False
+        if "await self.data_assistant_cleanup_pages()" not in text:
+            return False
+    return True
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("task_json", type=Path)
@@ -114,6 +128,7 @@ def main() -> int:
     if not main_py.exists():
         raise SystemExit(f"MediaCrawler main.py not found: {main_py}")
 
+    cleanup_patch_ok = has_cleanup_patch(media_home)
     run_dir = resolve_run_dir(task_path, task)
     run_dir.mkdir(parents=True, exist_ok=False)
 
@@ -131,6 +146,9 @@ def main() -> int:
 
     print(f"Run directory: {run_dir}")
     print(f"MediaCrawler: {media_home}")
+    if not cleanup_patch_ok:
+        print("Warning: MediaCrawler is missing the Data Assistant stale-tab cleanup patch.")
+        print("Run scripts/bootstrap.ps1 to update to MediaCrawler-data-assistant data-assistant-v0.1.2.")
     print("Command:", " ".join(cmd))
 
     if args.dry_run:

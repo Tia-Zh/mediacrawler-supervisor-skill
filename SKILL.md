@@ -29,7 +29,7 @@ Do not treat MediaCrawler as a fire-and-forget script. Keep the user informed ab
 
 2. **Check local readiness**
    - Run `scripts/doctor.ps1` on Windows when the user may not have MediaCrawler installed.
-   - If MediaCrawler is missing, use `scripts/bootstrap.ps1` only after telling the user it will clone/install MediaCrawler and that they must review MediaCrawler's license and platform terms.
+   - If MediaCrawler is missing or the doctor reports a missing Data Assistant cleanup patch, use `scripts/bootstrap.ps1` only after telling the user it will clone/update MediaCrawler and that they must review MediaCrawler's license and platform terms.
    - Prefer `MEDIACRAWLER_HOME` if set. Otherwise check the user's configured path, then common local paths.
 
 3. **Create a task file**
@@ -62,7 +62,7 @@ Do not treat MediaCrawler as a fire-and-forget script. Keep the user informed ab
 ## Scripts
 
 - `scripts/doctor.ps1`: Check local prerequisites and whether MediaCrawler exists.
-- `scripts/bootstrap.ps1`: Clone and install MediaCrawler into a local tools directory.
+- `scripts/bootstrap.ps1`: Clone or update MediaCrawler into a local tools directory. By default it uses `Tia-Zh/MediaCrawler-data-assistant` at `data-assistant-v0.1.2`, which includes Data Assistant's all-platform stale-tab cleanup patch.
 - `scripts/run_task.py`: Run a JSON task through MediaCrawler with reproducible logs.
 - `scripts/inspect_outputs.py`: Inspect raw output files and write collection metrics.
 

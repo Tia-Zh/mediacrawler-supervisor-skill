@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Inspect MediaCrawler output directories and write simple quality metrics."""
+"""Inspect MediaSpider outputs and write simple quality metrics."""
 
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ from typing import Any
 
 POST_HINTS = ("note", "post", "video", "content", "tieba", "zhihu", "bili", "xhs", "dy", "ks", "weibo")
 COMMENT_HINTS = ("comment", "comments")
+COMMENT_KEYS = {"comment_id", "comment_content", "parent_comment_id", "parent_comment_id_str"}
 
 
 def read_jsonl(path: Path) -> list[dict[str, Any]]:
@@ -56,7 +57,7 @@ def classify(path: Path, rows: list[dict[str, Any]]) -> str:
     keys = set()
     for row in rows[:20]:
         keys.update(k.lower() for k in row.keys())
-    if any(h in name for h in COMMENT_HINTS) or any("comment" in k for k in keys):
+    if any(h in name for h in COMMENT_HINTS) or bool(keys & COMMENT_KEYS):
         return "comments"
     if any(h in name for h in POST_HINTS):
         return "posts"
@@ -73,7 +74,13 @@ def row_id(row: dict[str, Any]) -> str:
 
 
 def inspect(root: Path) -> dict[str, Any]:
-    files = [p for p in root.rglob("*") if p.is_file() and p.suffix.lower() in {".jsonl", ".json", ".csv"}]
+    ignored_names = {"task.resolved.json", "inspection.json"}
+    files = [
+        p for p in root.rglob("*")
+        if p.is_file()
+        and p.name not in ignored_names
+        and p.suffix.lower() in {".jsonl", ".json", ".csv"}
+    ]
     totals = Counter()
     file_stats = []
     ids = []

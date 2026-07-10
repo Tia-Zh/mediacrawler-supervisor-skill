@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Run a MediaCrawler task JSON with reproducible logs."""
+"""Run a MediaSpider task JSON with reproducible logs."""
 
 from __future__ import annotations
 
@@ -56,10 +56,21 @@ def truth(value: Any) -> str:
 
 
 def default_home() -> Path:
-    env_home = os.environ.get("MEDIACRAWLER_HOME")
+    env_home = (
+        os.environ.get("MEDIASPIDER_HOME")
+        or os.environ.get("PUBLICSCOPE_HOME")
+        or os.environ.get("MEDIACRAWLER_HOME")
+    )
     if env_home:
         return Path(env_home)
-    return Path.home() / ".data_assistant" / "engines" / "MediaCrawler"
+    engine_root = Path.home() / ".data_assistant" / "engines"
+    mediaspider_home = engine_root / "MediaSpider"
+    if mediaspider_home.exists():
+        return mediaspider_home
+    publicscope_home = engine_root / "PublicScopeCollector"
+    if publicscope_home.exists():
+        return publicscope_home
+    return engine_root / "MediaCrawler"
 
 
 def build_command(task: dict[str, Any], media_home: Path) -> list[str]:
@@ -126,7 +137,7 @@ def main() -> int:
 
     main_py = media_home / "main.py"
     if not main_py.exists():
-        raise SystemExit(f"MediaCrawler main.py not found: {main_py}")
+        raise SystemExit(f"MediaSpider main.py not found: {main_py}")
 
     cleanup_patch_ok = has_cleanup_patch(media_home)
     run_dir = resolve_run_dir(task_path, task)
@@ -136,6 +147,9 @@ def main() -> int:
         output_dir = run_dir / "raw"
         output_dir.mkdir(parents=True, exist_ok=True)
         task["save_data_path"] = str(output_dir)
+    else:
+        output_dir = Path(task["save_data_path"]).expanduser().resolve()
+        output_dir.mkdir(parents=True, exist_ok=True)
 
     cmd = build_command(task, media_home)
 
@@ -145,10 +159,10 @@ def main() -> int:
     (run_dir / "command.txt").write_text(" ".join(cmd), encoding="utf-8")
 
     print(f"Run directory: {run_dir}")
-    print(f"MediaCrawler: {media_home}")
+    print(f"MediaSpider: {media_home}")
     if not cleanup_patch_ok:
         print("Warning: MediaCrawler is missing the Data Assistant stale-tab cleanup patch.")
-        print("Run scripts/bootstrap.ps1 to update to MediaCrawler-data-assistant data-assistant-v0.1.2.")
+        print("Run scripts/bootstrap.ps1 to install MediaSpider mediaspider-v0.2.0.")
     print("Command:", " ".join(cmd))
 
     if args.dry_run:
@@ -165,8 +179,32 @@ def main() -> int:
             stderr=subprocess.STDOUT,
             text=True,
         )
-        code = proc.wait()
+        try:
+            code = proc.wait()
+        except KeyboardInterrupt:
+            proc.terminate()
+            try:
+                proc.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                proc.kill()
+                proc.wait()
+            code = 130
         log.write(f"\nfinished_at={datetime.now().isoformat()}\nexit_code={code}\n")
+
+    output_suffixes = {".jsonl", ".json", ".csv", ".xlsx", ".xls"}
+    output_files = [
+        path for path in output_dir.rglob("*")
+        if path.is_file() and path.suffix.lower() in output_suffixes and path.stat().st_size > 0
+    ]
+    if code == 0 and not output_files:
+        log_text = (run_dir / "run.log").read_text(encoding="utf-8", errors="replace").lower()
+        login_markers = ("login failed", "failed by qrcode", "waiting for scan code", "have not found qrcode")
+        if any(marker in log_text for marker in login_markers):
+            print("Status: login required; no raw output was produced.")
+            code = 3
+        else:
+            print("Status: task finished without non-empty raw output.")
+            code = 4
 
     print(f"Exit code: {code}")
     print(f"Log: {run_dir / 'run.log'}")

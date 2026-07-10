@@ -1,5 +1,5 @@
 param(
-    [string]$MediaCrawlerHome = $env:MEDIACRAWLER_HOME,
+    [string]$CollectorHome = $(if ($env:MEDIASPIDER_HOME) { $env:MEDIASPIDER_HOME } elseif ($env:PUBLICSCOPE_HOME) { $env:PUBLICSCOPE_HOME } else { $env:MEDIACRAWLER_HOME }),
     [switch]$Json
 )
 
@@ -19,10 +19,14 @@ function Get-VersionLine($Command, $Arguments) {
     }
 }
 
-function Find-MediaCrawler($Provided) {
+function Find-MediaSpider($Provided) {
     $candidates = @()
     if ($Provided) { $candidates += $Provided }
+    $candidates += Join-Path $HOME ".data_assistant\engines\MediaSpider"
+    $candidates += Join-Path $HOME ".data_assistant\engines\PublicScopeCollector"
     $candidates += Join-Path $HOME ".data_assistant\engines\MediaCrawler"
+    $candidates += Join-Path (Get-Location) "MediaSpider"
+    $candidates += Join-Path (Get-Location) "PublicScopeCollector"
     $candidates += Join-Path (Get-Location) "MediaCrawler"
     $candidates += Join-Path (Get-Location) "engines\MediaCrawler"
 
@@ -34,7 +38,7 @@ function Find-MediaCrawler($Provided) {
     return ""
 }
 
-$foundHome = Find-MediaCrawler $MediaCrawlerHome
+$foundHome = Find-MediaSpider $CollectorHome
 $checks = [ordered]@{
     mediaCrawlerHome = $foundHome
     mediaCrawlerFound = [bool]$foundHome
@@ -81,7 +85,7 @@ if ($foundHome) {
     $checks.dataAssistantCleanupPatch = ($checks.dataAssistantCleanupMissing.Count -eq 0)
 }
 
-if (-not $checks.mediaCrawlerFound) { $checks.warnings += "MediaCrawler not found. Set MEDIACRAWLER_HOME or run bootstrap.ps1." }
+if (-not $checks.mediaCrawlerFound) { $checks.warnings += "MediaSpider not found. Set MEDIASPIDER_HOME or run bootstrap.ps1." }
 if (-not $checks.git.found) { $checks.warnings += "git is missing; bootstrap cannot clone MediaCrawler." }
 if (-not $checks.uv.found) { $checks.warnings += "uv is missing; install uv before dependency sync." }
 if (-not $checks.node.found) { $checks.warnings += "node is missing; some MediaCrawler platforms require Node.js." }
@@ -93,9 +97,9 @@ if ($checks.mediaCrawlerFound -and -not $checks.dataAssistantCleanupPatch) {
 if ($Json) {
     $checks | ConvertTo-Json -Depth 5
 } else {
-    "MediaCrawler doctor"
-    "MediaCrawler found: $($checks.mediaCrawlerFound)"
-    "MediaCrawler home : $($checks.mediaCrawlerHome)"
+    "MediaSpider doctor"
+    "Collector found: $($checks.mediaCrawlerFound)"
+    "Collector home : $($checks.mediaCrawlerHome)"
     "Cleanup patch    : $($checks.dataAssistantCleanupPatch)"
     "git              : $($checks.git.found) $($checks.git.version)"
     "uv               : $($checks.uv.found) $($checks.uv.version)"

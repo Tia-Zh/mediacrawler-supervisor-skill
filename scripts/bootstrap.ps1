@@ -1,7 +1,7 @@
 param(
     [string]$InstallRoot = (Join-Path $HOME ".data_assistant\engines"),
-    [string]$RepoUrl = "https://github.com/Tia-Zh/MediaCrawler-data-assistant.git",
-    [string]$RepoRef = "data-assistant-v0.1.2",
+    [string]$RepoUrl = "https://github.com/Tia-Zh/MediaSpider.git",
+    [string]$RepoRef = "mediaspider-v0.2.0",
     [switch]$SkipPlaywrightInstall
 )
 
@@ -16,13 +16,13 @@ function Require-Command($Name) {
 Require-Command "git"
 Require-Command "uv"
 
-$target = Join-Path $InstallRoot "MediaCrawler"
+$target = Join-Path $InstallRoot "MediaSpider"
 New-Item -ItemType Directory -Force -Path $InstallRoot | Out-Null
 
 if (Test-Path (Join-Path $target "main.py")) {
-    Write-Host "MediaCrawler already exists at $target"
+    Write-Host "MediaSpider already exists at $target"
 } else {
-    Write-Host "Cloning MediaCrawler into $target"
+    Write-Host "Cloning MediaSpider into $target"
     Write-Host "Source: $RepoUrl"
     git clone $RepoUrl $target
 }
@@ -32,16 +32,16 @@ try {
     if (Test-Path ".git") {
         $dirty = git status --porcelain
         if ($dirty) {
-            Write-Warning "MediaCrawler has local changes. Skipping automatic checkout of $RepoRef."
+            Write-Warning "MediaSpider has local changes. Skipping automatic checkout of $RepoRef."
             Write-Warning "Review the changes, then update manually if this is not intentional."
         } else {
-            Write-Host "Updating MediaCrawler to $RepoRef"
+            Write-Host "Updating MediaSpider to $RepoRef"
             git fetch --tags origin
             git checkout $RepoRef
         }
     } else {
-        Write-Warning "MediaCrawler exists but is not a git checkout. Cannot automatically update to $RepoRef."
-        Write-Warning "Install into a new directory or replace it with the Data Assistant adapted repository if the cleanup patch is missing."
+        Write-Warning "MediaSpider exists but is not a git checkout. Cannot automatically update to $RepoRef."
+        Write-Warning "Install into a new directory or replace it with MediaSpider if the compatibility patch is missing."
     }
 
     Write-Host "Syncing Python dependencies with uv"
@@ -54,8 +54,8 @@ try {
 
     Write-Host ""
     Write-Host "Bootstrap complete."
-    Write-Host "Set MEDIACRAWLER_HOME to: $target"
-    Write-Host "Default source is the Data Assistant adapted MediaCrawler repository."
+    Write-Host "Set MEDIASPIDER_HOME to: $target"
+    Write-Host "Default source is MediaSpider, based on MediaCrawler."
     Write-Host "Default version is: $RepoRef"
     Write-Host "Review MediaCrawler LICENSE and platform terms before running collection tasks."
 } finally {

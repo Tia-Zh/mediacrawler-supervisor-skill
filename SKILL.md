@@ -1,15 +1,15 @@
 ---
-name: mediacrawler-supervisor
-description: Use when an AI agent needs to help a user install, configure, run, monitor, troubleshoot, or summarize MediaCrawler public-data collection tasks on a local machine, especially when the user describes a social-media/comment crawl in natural language, asks to collect posts or comments from platforms such as xhs, dy, ks, bili, wb, tieba, or zhihu, wants the agent to watch the run and adjust strategy based on output quality, or needs a reproducible task package with logs, raw data, inspection metrics, and a final collection note.
+name: mediaspider-supervisor
+description: Use when an AI agent needs to install, configure, run, monitor, troubleshoot, or summarize MediaSpider public-data tasks on a local machine, especially for posts or comments from xhs, dy, ks, bili, wb, tieba, or zhihu; use it to turn natural-language collection goals into reproducible tasks, verify real output, detect login or network blockers, adjust strategy, and deliver logs, raw data, inspection metrics, and a collection note.
 ---
 
-# MediaCrawler Supervisor
+# MediaSpider Supervisor
 
 ## Purpose
 
-Use this skill to act as a local MediaCrawler collection supervisor. Convert the user's collection goal into a small, auditable task, check whether MediaCrawler is installed, run with conservative limits first, inspect the output, and decide whether to continue, adjust, pause, or summarize.
+Use this skill to supervise MediaSpider, an adapted distribution based on MediaCrawler. Convert the user's collection goal into a small, auditable task, check whether the engine is installed, run with conservative limits first, inspect real output, and decide whether to continue, adjust, pause, or summarize.
 
-Do not treat MediaCrawler as a fire-and-forget script. Keep the user informed about progress, data quality, limits, and reasons for every strategy change.
+Do not treat MediaSpider as a fire-and-forget script. Keep the user informed about progress, data quality, limits, and reasons for every strategy change.
 
 ## Safety Defaults
 
@@ -28,9 +28,9 @@ Do not treat MediaCrawler as a fire-and-forget script. Keep the user informed ab
    - Translate vague goals into keyword groups. Include aliases, event terms, neutral terms, and negative/positive variants when useful.
 
 2. **Check local readiness**
-   - Run `scripts/doctor.ps1` on Windows when the user may not have MediaCrawler installed.
-   - If MediaCrawler is missing or the doctor reports a missing Data Assistant cleanup patch, use `scripts/bootstrap.ps1` only after telling the user it will clone/update MediaCrawler and that they must review MediaCrawler's license and platform terms.
-   - Prefer `MEDIACRAWLER_HOME` if set. Otherwise check the user's configured path, then common local paths.
+   - Run `scripts/doctor.ps1` on Windows when the user may not have MediaSpider installed.
+   - If the collector is missing or the doctor reports a missing compatibility patch, use `scripts/bootstrap.ps1` only after telling the user it will clone/update MediaSpider and that they must review the inherited MediaCrawler license and platform terms.
+   - Prefer `MEDIASPIDER_HOME` if set. Keep `PUBLICSCOPE_HOME`, `MEDIACRAWLER_HOME`, and the legacy `MediaCrawler` directory as compatibility fallbacks.
 
 3. **Create a task file**
    - Use the schema in `references/task-schema.md`.
@@ -40,12 +40,12 @@ Do not treat MediaCrawler as a fire-and-forget script. Keep the user informed ab
 
 4. **Run a trial**
    - Use `scripts/run_task.py <task.json> --dry-run` first to show the command.
-   - Run the real task only after checking paths, limits, and output directory.
+   - Run the real task only after checking paths, limits, and output directory. A successful dry-run proves only command generation.
    - Watch `run.log` and stop or pause when the run is clearly blocked.
 
 5. **Inspect output**
    - Run `scripts/inspect_outputs.py <run-dir-or-output-dir>`.
-   - Report post count, comment count, files found, empty/failed files, duplicate indicators, and whether the sample is enough for the user's goal.
+   - Report post count, comment count, files found, empty/failed files, duplicate indicators, and whether the sample is enough for the user's goal. Do not report success when no non-empty raw output exists.
    - If the result is weak, choose a specific adjustment rather than simply increasing volume.
 
 6. **Adjust strategy**
@@ -61,9 +61,9 @@ Do not treat MediaCrawler as a fire-and-forget script. Keep the user informed ab
 
 ## Scripts
 
-- `scripts/doctor.ps1`: Check local prerequisites and whether MediaCrawler exists.
-- `scripts/bootstrap.ps1`: Clone or update MediaCrawler into a local tools directory. By default it uses `Tia-Zh/MediaCrawler-data-assistant` at `data-assistant-v0.1.2`, which includes Data Assistant's all-platform stale-tab cleanup patch.
-- `scripts/run_task.py`: Run a JSON task through MediaCrawler with reproducible logs.
+- `scripts/doctor.ps1`: Check local prerequisites and whether MediaSpider exists.
+- `scripts/bootstrap.ps1`: Clone or update MediaSpider into a local tools directory. By default it uses `Tia-Zh/MediaSpider` at `mediaspider-v0.2.0`.
+- `scripts/run_task.py`: Run a JSON task through MediaSpider with reproducible logs.
 - `scripts/inspect_outputs.py`: Inspect raw output files and write collection metrics.
 
 Read `references/task-schema.md` before creating or editing task JSON. Read `references/platform-notes.md` when choosing platform-specific limits. Read `references/troubleshooting.md` when a run fails, stalls, or returns empty data.

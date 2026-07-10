@@ -1,6 +1,6 @@
 # Troubleshooting
 
-## MediaCrawler Not Found
+## MediaSpider Not Found
 
 Run:
 
@@ -14,15 +14,15 @@ If missing, ask the user before installing:
 scripts\bootstrap.ps1
 ```
 
-By default, `bootstrap.ps1` installs the Data Assistant adapted repository:
+By default, `bootstrap.ps1` installs MediaSpider, an adapted distribution based on MediaCrawler:
 
 ```text
-https://github.com/Tia-Zh/MediaCrawler-data-assistant.git
+https://github.com/Tia-Zh/MediaSpider.git
 ```
 
-The default ref is `data-assistant-v0.1.2`. This version includes the Data Assistant stale-tab cleanup patch for `wb`, `dy`, `ks`, `xhs`, `bili`, `tieba`, and `zhihu`.
+The default ref is `mediaspider-v0.2.0`. This version includes stale-tab cleanup for all domestic platforms, browser compatibility fixes, and resilient Bilibili task limits.
 
-Use `-RepoUrl` only when the user explicitly wants another MediaCrawler source. The user must review MediaCrawler's license and the target platforms' terms before collection.
+Use `-RepoUrl` only when the user explicitly wants another engine source. The user must review the inherited MediaCrawler license and the target platforms' terms before collection.
 
 ## Missing Cleanup Patch
 
@@ -32,7 +32,15 @@ If `doctor.ps1` reports that the cleanup patch is missing, run:
 scripts\bootstrap.ps1
 ```
 
-If the existing MediaCrawler directory has local changes, bootstrap will not overwrite it automatically. Review or back up those changes, then update MediaCrawler to the adapted ref manually.
+If the existing collector directory has local changes, bootstrap will not overwrite it automatically. Review or back up those changes, then update to the adapted ref manually.
+
+## Dry Run Versus Real Success
+
+A dry-run proves only that the task can be converted into a command. Real success requires at least one non-empty raw output file. `run_task.py` returns a failure status when login is required or the task exits without output.
+
+## Proxy Failure
+
+If the browser reports `ERR_PROXY_CONNECTION_FAILED`, check whether Windows proxy is enabled while its local proxy port is closed. Do not hardcode `--no-proxy-server` into every platform; correct the system proxy or task environment consistently so browser and API requests use the same network path.
 
 ## Dependency Failure
 

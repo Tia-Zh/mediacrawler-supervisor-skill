@@ -20,7 +20,7 @@ By default, `bootstrap.ps1` installs MediaSpider, an adapted distribution based 
 https://github.com/Tia-Zh/MediaSpider.git
 ```
 
-The default ref is `mediaspider-v0.2.0`. This version includes stale-tab cleanup for all domestic platforms, browser compatibility fixes, and resilient Bilibili task limits.
+The default ref is `mediaspider-v0.2.1`. This version includes stale-tab cleanup for all domestic platforms, browser compatibility fixes, resilient Bilibili task limits, and browser-driven Douyin search pagination.
 
 Use `-RepoUrl` only when the user explicitly wants another engine source. The user must review the inherited MediaCrawler license and the target platforms' terms before collection.
 

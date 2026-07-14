@@ -162,7 +162,7 @@ def main() -> int:
     print(f"MediaSpider: {media_home}")
     if not cleanup_patch_ok:
         print("Warning: MediaCrawler is missing the Data Assistant stale-tab cleanup patch.")
-        print("Run scripts/bootstrap.ps1 to install MediaSpider mediaspider-v0.2.1.")
+        print("Run scripts/bootstrap.ps1 to install MediaSpider mediaspider-v0.2.2.")
     print("Command:", " ".join(cmd))
 
     if args.dry_run:

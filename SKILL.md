@@ -62,7 +62,7 @@ Do not treat MediaSpider as a fire-and-forget script. Keep the user informed abo
 ## Scripts
 
 - `scripts/doctor.ps1`: Check local prerequisites and whether MediaSpider exists.
-- `scripts/bootstrap.ps1`: Clone or update MediaSpider into a local tools directory. By default it uses `Tia-Zh/MediaSpider` at `mediaspider-v0.2.1`.
+- `scripts/bootstrap.ps1`: Clone or update MediaSpider into a local tools directory. By default it uses `Tia-Zh/MediaSpider` at `mediaspider-v0.2.2`.
 - `scripts/run_task.py`: Run a JSON task through MediaSpider with reproducible logs.
 - `scripts/inspect_outputs.py`: Inspect raw output files and write collection metrics.
 

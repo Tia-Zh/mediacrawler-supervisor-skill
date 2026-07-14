@@ -1,7 +1,7 @@
 param(
     [string]$InstallRoot = (Join-Path $HOME ".data_assistant\engines"),
     [string]$RepoUrl = "https://github.com/Tia-Zh/MediaSpider.git",
-    [string]$RepoRef = "mediaspider-v0.2.1",
+    [string]$RepoRef = "mediaspider-v0.2.2",
     [switch]$SkipPlaywrightInstall
 )
 

@@ -1,13 +1,13 @@
 ---
 name: mediaspider-supervisor
-description: Use when an AI agent needs to install, configure, run, monitor, troubleshoot, or summarize MediaSpider public-data tasks on a local machine, especially for posts or comments from xhs, dy, ks, bili, wb, tieba, or zhihu; use it to turn natural-language collection goals into reproducible tasks, verify real output, detect login or network blockers, adjust strategy, and deliver logs, raw data, inspection metrics, and a collection note.
+description: Use when an AI agent needs to install, configure, run, monitor, troubleshoot, or summarize MediaSpider public-data tasks across domestic platforms (xhs, dy, ks, bili, wb, tieba, zhihu) or foreign sources (X, YouTube, Reddit, TikTok, Instagram, Bluesky, Threads, GitHub and more); turn natural-language goals into reproducible tasks, verify real output, detect blockers, adjust strategy, and deliver logs, raw data, Excel workbooks, inspection metrics, and a collection note.
 ---
 
 # MediaSpider Supervisor
 
 ## Purpose
 
-Use this skill to supervise MediaSpider, an adapted distribution based on MediaCrawler. Convert the user's collection goal into a small, auditable task, check whether the engine is installed, run with conservative limits first, inspect real output, and decide whether to continue, adjust, pause, or summarize.
+Use this skill to supervise MediaSpider, an adapted distribution based on MediaCrawler with an additional foreign-source collection layer. Convert the user's collection goal into a small, auditable task, check whether the engine is installed, run with conservative limits first, inspect real output, and decide whether to continue, adjust, pause, or summarize.
 
 Do not treat MediaSpider as a fire-and-forget script. Keep the user informed about progress, data quality, limits, and reasons for every strategy change.
 
@@ -26,16 +26,19 @@ Do not treat MediaSpider as a fire-and-forget script. Keep the user informed abo
    - Extract platform(s), topic, time window, language/region, desired evidence type, and target output.
    - If the request is broad, start with one or two platforms and a trial run.
    - Translate vague goals into keyword groups. Include aliases, event terms, neutral terms, and negative/positive variants when useful.
+   - Decide whether the task is domestic or foreign. Split mixed requests into separate task files and merge downstream.
 
 2. **Check local readiness**
    - Run `scripts/doctor.ps1` on Windows when the user may not have MediaSpider installed.
    - If the collector is missing or the doctor reports a missing compatibility patch, use `scripts/bootstrap.ps1` only after telling the user it will clone/update MediaSpider and that they must review the inherited MediaCrawler license and platform terms.
    - Prefer `MEDIASPIDER_HOME` if set. Keep `PUBLICSCOPE_HOME`, `MEDIACRAWLER_HOME`, and the legacy `MediaCrawler` directory as compatibility fallbacks.
+   - For foreign tasks, check `foreignCollector`, `agentReach`, and optional `last30daysConfigured` in doctor output. `fallback-only` does not require last30days.
 
 3. **Create a task file**
    - Use the schema in `references/task-schema.md`.
    - Put each run in a timestamped run directory.
    - Use `save_data_option: "jsonl"` for raw analysis-friendly output unless the user needs Excel immediately.
+   - Foreign tasks always export an Excel workbook with one platform per sheet and retain raw JSON/logs.
    - Keep `headless: false` for login/captcha-prone platforms unless the user has a stable logged-in browser context.
 
 4. **Run a trial**
@@ -45,7 +48,7 @@ Do not treat MediaSpider as a fire-and-forget script. Keep the user informed abo
 
 5. **Inspect output**
    - Run `scripts/inspect_outputs.py <run-dir-or-output-dir>`.
-   - Report post count, comment count, files found, empty/failed files, duplicate indicators, and whether the sample is enough for the user's goal. Do not report success when no non-empty raw output exists.
+   - Report post count, comment count, per-platform rows, files found, empty/failed files, duplicate indicators, and whether the sample is enough for the user's goal. Do not report success when an Excel shell exists but its platform row counts are zero.
    - If the result is weak, choose a specific adjustment rather than simply increasing volume.
 
 6. **Adjust strategy**
@@ -62,7 +65,7 @@ Do not treat MediaSpider as a fire-and-forget script. Keep the user informed abo
 ## Scripts
 
 - `scripts/doctor.ps1`: Check local prerequisites and whether MediaSpider exists.
-- `scripts/bootstrap.ps1`: Clone or update MediaSpider into a local tools directory. By default it uses `Tia-Zh/MediaSpider` at `mediaspider-v0.2.2`.
+- `scripts/bootstrap.ps1`: Clone or update MediaSpider into a local tools directory. By default it uses `Tia-Zh/MediaSpider` at `mediaspider-v0.3.0`.
 - `scripts/run_task.py`: Run a JSON task through MediaSpider with reproducible logs.
 - `scripts/inspect_outputs.py`: Inspect raw output files and write collection metrics.
 

@@ -20,7 +20,7 @@ By default, `bootstrap.ps1` installs MediaSpider, an adapted distribution based 
 https://github.com/Tia-Zh/MediaSpider.git
 ```
 
-The default ref is `mediaspider-v0.2.2`. This version includes stale-tab cleanup for all domestic platforms, browser compatibility fixes, resilient Bilibili task limits, browser-driven Douyin search pagination, and exact Weibo post/comment limits.
+The default ref is `mediaspider-v0.3.0`. It includes the domestic stability fixes plus the official foreign-source collection entrypoint and Excel export.
 
 Use `-RepoUrl` only when the user explicitly wants another engine source. The user must review the inherited MediaCrawler license and the target platforms' terms before collection.
 
@@ -72,6 +72,8 @@ Recommended response:
 2. Inspect output with `inspect_outputs.py`.
 3. Try one smaller alternative keyword group.
 4. Stop after repeated empty results and report the likely cause.
+
+For foreign tasks, also check which backend serves the requested platform. A workbook with zero rows in `采集概览` is an empty result, not a successful collection. Try `foreign_mode: "fallback-only"` first; use `hybrid` only when last30days is available.
 
 ## Too Few Posts But Many Comments
 

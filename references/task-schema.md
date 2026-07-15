@@ -1,15 +1,16 @@
 # Task Schema
 
-Create one JSON file per MediaCrawler run. Keep it small, explicit, and reproducible.
+Create one JSON file per run. Domestic and foreign platforms use the same runner but different fields.
 
-## Minimal Search Task
+## Domestic Task
 
 ```json
 {
+  "collector": "domestic",
   "platform": "xhs",
   "crawler_type": "search",
   "login_type": "qrcode",
-  "keywords": ["india travel", "india visitors"],
+  "keywords": ["India travel", "India visitors"],
   "get_comment": true,
   "get_sub_comment": false,
   "max_posts": 20,
@@ -20,45 +21,66 @@ Create one JSON file per MediaCrawler run. Keep it small, explicit, and reproduc
 }
 ```
 
-## Fields
+Domestic `platform` values: `xhs`, `dy`, `ks`, `bili`, `wb`, `tieba`, `zhihu`.
 
-- `media_crawler_home`: Optional absolute engine path. Prefer `MEDIASPIDER_HOME`; `PUBLICSCOPE_HOME` and `MEDIACRAWLER_HOME` remain compatibility fallbacks. New installs should use MediaSpider unless the user asks for another source.
-- `run_dir`: Optional absolute or relative run directory. If omitted, `run_task.py` creates a timestamped directory beside the task file.
-- `platform`: Required. One of `xhs`, `dy`, `ks`, `bili`, `wb`, `tieba`, `zhihu`.
-- `crawler_type`: Required. One of `search`, `detail`, `creator`.
-- `login_type`: Usually `qrcode`. Use `cookie` only when the user provides cookies locally.
-- `keywords`: String or list. Used by `search`.
-- `specified_id`: String or list. Used by `detail`.
-- `creator_id`: String or list. Used by `creator`.
-- `get_comment`: Boolean. Crawl first-level comments.
-- `get_sub_comment`: Boolean. Crawl second-level comments. Start with `false` unless the task needs deep threads.
-- `max_posts`: Maximum posts/videos/items to crawl.
-- `max_comments_per_post`: Maximum first-level comments per post.
-- `max_concurrency`: Keep `1` for trial runs and login-sensitive platforms.
-- `save_data_option`: Prefer `jsonl` for raw collection, `excel` for immediate human review.
-- `save_data_path`: Optional output directory. If omitted, `run_task.py` creates `raw/` under the run directory.
-- `headless`: Keep `false` when login, captcha, or manual verification may appear.
-- `enable_ip_proxy`, `ip_proxy_pool_count`, `ip_proxy_provider_name`, `static_proxy_url`: Proxy settings. Do not enable unless the user has approved and configured a compliant provider.
+Useful fields: `crawler_type`, `login_type`, `keywords`, `specified_id`, `creator_id`, `get_comment`, `get_sub_comment`, `max_posts`, `max_comments_per_post`, `max_concurrency`, `save_data_option`, `save_data_path`, `headless`, and approved proxy settings.
 
-## Trial Limits
+## Foreign Task
 
-Start with:
+```json
+{
+  "collector": "foreign",
+  "topic": "AI public discussion",
+  "platforms": ["x", "youtube", "reddit", "bluesky"],
+  "start_date": "2026-06-01",
+  "end_date": "2026-06-30",
+  "keywords": ["AI", "artificial intelligence", "large language model"],
+  "match_mode": "any",
+  "foreign_mode": "fallback-only",
+  "max_results_per_platform": 50,
+  "command_timeout": 180,
+  "deep_crawl": false
+}
+```
 
-- `max_posts`: 10-30
-- `max_comments_per_post`: 10-50
-- `max_concurrency`: 1
-- `get_sub_comment`: false
+Common foreign platforms: `x`, `youtube`, `reddit`, `tiktok`, `instagram`, `bluesky`, `threads`, `pinterest`, `truthsocial`, `github`, `hackernews`, `polymarket`, `grounding`. Availability depends on installed local backends, login state, and platform access.
 
-Increase only after inspecting output quality and explaining why.
+Foreign fields:
 
-## Run Package
+- `topic`: Human-readable task label or broad query.
+- `platforms`: String or list of foreign platform codes.
+- `start_date`, `end_date`: Inclusive `YYYY-MM-DD` range.
+- `keywords`: One keyword group.
+- `subject_terms`, `issue_terms`: Two groups for double-hit filtering.
+- `match_mode`: `auto`, `any`, `all`, or `double-hit`.
+- `foreign_mode`: `fallback-only`, `hybrid`, or `last30days`. Default is `fallback-only`.
+- `max_results_per_platform`: Requested fallback rows per query and source; upstream platforms may return fewer.
+- `drop_undated`: Drop rows without a parseable date when a date range is set.
+- `deep_crawl`: Expand comments/replies for supported X, Reddit, and YouTube backends.
+- `deep_targets_per_source`, `deep_comments_per_item`, `deep_reply_depth`: Deep-crawl controls.
+- `last30days_script`: Optional explicit path to `last30days.py`.
+- `output`, `output_dir`: Optional paths. Otherwise the runner creates `raw/foreign_sources.xlsx` and retains raw JSON/logs.
 
-Each run directory should contain:
+Double-hit example:
 
-- `task.resolved.json`
-- `command.txt`
-- `run.log`
-- `inspection.json`
-- `decision_log.jsonl` for multi-step runs
-- `raw/` output files
-- `collection_note.md` for the final summary
+```json
+{
+  "collector": "foreign",
+  "topic": "India travel to China",
+  "platforms": ["x", "youtube", "reddit"],
+  "start_date": "2026-06-01",
+  "end_date": "2026-06-30",
+  "subject_terms": ["India", "Indian tourists", "Indian students"],
+  "issue_terms": ["China", "visa", "travel"],
+  "match_mode": "double-hit",
+  "foreign_mode": "hybrid"
+}
+```
+
+## Shared Fields
+
+- `mediaspider_home` or legacy `media_crawler_home`: Optional engine path. Prefer `MEDIASPIDER_HOME`.
+- `run_dir`: Optional run directory. If omitted, the runner creates a timestamped directory beside the task file.
+- Do not mix domestic and foreign platforms in one task file. Use two task files and merge their outputs downstream.
+
+Each run contains `task.resolved.json`, `command.txt`, `run.log`, a `raw/` directory, and `inspection.json` after inspection.

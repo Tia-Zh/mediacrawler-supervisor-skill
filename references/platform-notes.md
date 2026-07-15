@@ -47,6 +47,14 @@ Use these notes to choose conservative defaults. Platform behavior changes often
 - Good for Q&A, longer explanations, and opinion reasoning.
 - Search may produce fewer but longer items; inspect text quality before increasing volume.
 
+## Foreign Sources
+
+- X, YouTube, and Reddit have the strongest local collection and optional deep comment/reply paths.
+- TikTok, Instagram, Bluesky, Threads, Pinterest, and Truth Social depend more heavily on local login state, OpenCLI/platform CLIs, or optional last30days support.
+- GitHub, Hacker News, Polymarket, and web search are useful supplementary public sources but are not substitutes for social-platform volume.
+- Use `fallback-only` when last30days is unavailable. Use `hybrid` when recall matters and last30days is installed.
+- Date filtering is exact only when a backend returns a parseable publication time. Use `drop_undated: true` only when strict date compliance matters more than recall.
+
 ## Strategy Signals
 
 - Few posts, many comments: switch to comment-deepening mode.

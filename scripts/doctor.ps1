@@ -45,6 +45,9 @@ $checks = [ordered]@{
     dataAssistantCleanupPatch = $false
     dataAssistantCleanupPlatforms = @()
     dataAssistantCleanupMissing = @()
+    foreignCollector = $false
+    agentReach = [ordered]@{ found = Test-Command "agent-reach"; version = "" }
+    last30daysConfigured = [bool]$env:LAST30DAYS_SCRIPT
     git = [ordered]@{ found = Test-Command "git"; version = "" }
     uv = [ordered]@{ found = Test-Command "uv"; version = "" }
     python = [ordered]@{ found = Test-Command "python"; version = "" }
@@ -57,6 +60,7 @@ if ($checks.git.found) { $checks.git.version = Get-VersionLine "git" @("--versio
 if ($checks.uv.found) { $checks.uv.version = Get-VersionLine "uv" @("--version") }
 if ($checks.python.found) { $checks.python.version = Get-VersionLine "python" @("--version") }
 if ($checks.node.found) { $checks.node.version = Get-VersionLine "node" @("--version") }
+if ($checks.agentReach.found) { $checks.agentReach.version = Get-VersionLine "agent-reach" @("--version") }
 
 $chromePaths = @(
     "$env:ProgramFiles\Google\Chrome\Application\chrome.exe",
@@ -68,6 +72,7 @@ $chromePaths = @(
 $checks.chromeLikely = [bool]($chromePaths | Where-Object { $_ -and (Test-Path $_) } | Select-Object -First 1)
 
 if ($foundHome) {
+    $checks.foreignCollector = (Test-Path (Join-Path $foundHome "foreign_collect.py")) -and (Test-Path (Join-Path $foundHome "foreign_sources\last30days_excel.py"))
     $platforms = @("douyin", "kuaishou", "xhs", "bilibili", "weibo", "tieba", "zhihu")
     foreach ($platform in $platforms) {
         $corePath = Join-Path $foundHome "media_platform\$platform\core.py"
@@ -93,6 +98,9 @@ if (-not $checks.chromeLikely) { $checks.warnings += "Chrome/Edge was not found 
 if ($checks.mediaCrawlerFound -and -not $checks.dataAssistantCleanupPatch) {
     $checks.warnings += "MediaCrawler is missing the Data Assistant stale-tab cleanup patch for: $($checks.dataAssistantCleanupMissing -join ', '). Run bootstrap.ps1 to update to the adapted version."
 }
+if ($checks.mediaCrawlerFound -and -not $checks.foreignCollector) {
+    $checks.warnings += "This MediaSpider build does not include the foreign collector. Run bootstrap.ps1 to install the current release."
+}
 
 if ($Json) {
     $checks | ConvertTo-Json -Depth 5
@@ -101,6 +109,9 @@ if ($Json) {
     "Collector found: $($checks.mediaCrawlerFound)"
     "Collector home : $($checks.mediaCrawlerHome)"
     "Cleanup patch    : $($checks.dataAssistantCleanupPatch)"
+    "Foreign collector: $($checks.foreignCollector)"
+    "agent-reach       : $($checks.agentReach.found) $($checks.agentReach.version)"
+    "last30days config : $($checks.last30daysConfigured)"
     "git              : $($checks.git.found) $($checks.git.version)"
     "uv               : $($checks.uv.found) $($checks.uv.version)"
     "python           : $($checks.python.found) $($checks.python.version)"
